@@ -18,7 +18,12 @@ window.onload = function(){
   }
 
   // ADD THE attributesEnter HERE!
-  // var attributesEnter = ;
+  var attributesEnter = [{color: 'red', r: 40, cx: 100},
+                  {color: 'blue', r: 30, cx: 50},
+                  {color: 'yellow', r: 60, cx: 180},
+                  {color: 'green', r: 50, cx: 260}];
+
+  var attributesExit = [{color: 'red', r: 40, cx: 100}];
 
   var zoom = d3.behavior.zoom()
                       .scaleExtent([1, 5])
@@ -36,11 +41,33 @@ window.onload = function(){
                           .attr('cx', cx)
                           .attr('cy', '50px');
 
-  // ADD THE attributesExit HERE! Remember to repeat at least one of the elements of attributesEnter
-  // var attributesExit = ;
-  //
-  // svgCircles.selectAll('circle')
-  //             .data(attributesExit)
-  //             .exit()
-  //             .attr("fill", changeColor);
+
+
+  var circles = svgCircles.selectAll('circle')
+                   .data(attributesExit)
+                   .exit()
+                   .attr("fill", changeColor);
+
+                   d3.json("usa.json", function(error, usa) {
+                       if (error) return console.error(error);
+
+                       // var scale = integer;  // around 800 should be fine
+                       // var center = [longitude, latitude];
+                       // var zoomOffset = double;  // the amount the zoom center should deviate from the map's center
+
+                       zoom.center(center.map(function(el){return el + zoomOffset;}));
+
+                       var usaObject = usa.objects.layer1;
+                       var topoUsaFeatures = topojson.feature(usa, usaObject);
+
+                       var projectionLittle = d3.geo.mercator()
+                                                   .scale(scale)
+                                                   .center(center);
+
+                       var path = d3.geo.path()
+                                         .projection(projectionLittle);
+                                         svgMap.append("path")
+                                         .datum(topoUsaFeatures)
+                                         .attr("d", path);
+                       });
 };
